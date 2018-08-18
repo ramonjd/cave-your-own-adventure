@@ -8,9 +8,9 @@
   - Set `WP_DEBUG` to `false` in your `wp-config.php`
   - Run `npm build`
 
-https://wisdomplugin.com/build-gutenberg-block-plugin/
-https://www.amc.com/shows/halt-and-catch-fire/exclusives/colossal-cave-adventure
-https://organicthemes.com/create-custom-block-wordpress-gutenberg/
-https://github.com/Invulu/organic-profile-block
-https://wordpress.org/gutenberg/handbook/templates/
-https://smartcatdesign.net/articles/building-gutenberg-blocks-guide/
+## Plugin
+1. Create custom post type: Choose your own adventure master
+2. Child pages are chapters in the story
+3. Built for Gutenberg: compulsory custom block (always rendered to page) to create decision points to other chapters (this block should show available story points)
+4. Somewhere we should warn about orphan pages
+5. Somewhere we should show an illustrative layout of the story tree

@@ -24,7 +24,8 @@ class CYOABlock {
 	category = 'widgets';
 	attributes = {};
 
-	edit = () => {
+	edit = ( { attributes } ) => {
+		const { content } = attributes;
 		return(
 			<div className={ classNames( 'cyoa__editor' ) }>
 				<p>Hello editor.</p>
