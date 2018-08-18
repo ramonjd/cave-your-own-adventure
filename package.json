@@ -1,0 +1,38 @@
+{
+  "name": "cave-your-own-adventure",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:ramonjd/cave-your-own-adventure.git",
+  "author": "ramonjd <ramonjd@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "dev": "yarn run clean-dev && ./node_modules/.bin/webpack -d --watch --config webpack.development.js",
+    "build": "yarn run clean-prod && ./node_modules/.bin/webpack -p --progress --config webpack.production.js",
+    "clean-dev": "rm -rf ./build/*",
+    "clean-prod": "rm -rf ./block/*.js ./block/*.css"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.5",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
+    "css-loader": "^1.0.0",
+    "mini-css-extract-plugin": "^0.4.1",
+    "node-sass": "^4.9.3",
+    "optimize-css-assets-webpack-plugin": "^5.0.0",
+    "sass-loader": "^7.1.0",
+    "style-loader": "^0.22.1",
+    "uglifyjs-webpack-plugin": "^1.3.0",
+    "webpack": "^4.16.5",
+    "webpack-cli": "^3.1.0",
+    "webpack-merge": "^4.1.4"
+  },
+  "dependencies": {
+    "classnames": "^2.2.6",
+    "prop-types": "^15.6.2",
+    "react": "^16.4.2"
+  }
+}
