@@ -43,3 +43,7 @@ if ( ! defined( 'CYOA_NAME' ) ) {
 
 require_once plugin_dir_path( __FILE__ ) . '/includes/class-cyoa-custom-post.php';
 require_once plugin_dir_path( __FILE__ ) . '/block/index.php';
+
+
+
+

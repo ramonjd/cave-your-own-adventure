@@ -1,5 +1,6 @@
 export const {
 	BaseControl,
 	Toolbar,
-	IconButton
+	IconButton, Button,
+	MenuGroup, MenuItem, TextControl, SelectControl, PanelBody
 } = wp.components;

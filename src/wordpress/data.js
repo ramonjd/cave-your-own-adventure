@@ -1,0 +1,1 @@
+export const { withSelect, withDispatch } = wp.data;

@@ -24,6 +24,13 @@ class CYOA_Custom_Post {
 	private $post_type = 'cyoa';
 
 	/**
+	 * Slug and rest base
+	 *
+	 * @var string
+	 **/
+	private $rest_base = 'cave-your-own-adventure';
+
+	/**
 	 * Programmatic name for support categories
 	 *
 	 * @var string
@@ -46,6 +53,11 @@ class CYOA_Custom_Post {
 
 		// Register taxonomies.
 		add_action( 'init', array( $this, 'register_taxonomy' ) );
+
+		add_action( 'admin_menu' , array( $this, 'add_settings_page' ) );
+
+		add_action('add_meta_boxes', array( $this, 'add_meta' ));
+
 	}
 
 	/**
@@ -68,12 +80,12 @@ class CYOA_Custom_Post {
 		$args = array(
 			'description'       => 'A starter post for a cave your own adventure!',
 			'public'            => true,
-			'supports'          => array( 'title', 'editor', 'thumbnail', 'excerpt', 'revisions', 'page-attributes' ),
+			'supports'          => array( 'title', 'editor' ),
 			'labels'            => $labels,
-			'hierarchical'      => false,
+			'hierarchical'      => true,
 			'has_archive'       => true,
 			'rewrite'           => array(
-				'slug'       => 'support',
+				'slug'       => $this->rest_base,
 				'with_front' => false,
 			),
 			'show_ui'           => true,
@@ -81,6 +93,15 @@ class CYOA_Custom_Post {
 			'show_in_menu'      => true,
 			'show_in_nav_menus' => true,
 			'menu_icon'         => 'dashicons-book-alt',
+			// To show Gutenberg: https://core.trac.wordpress.org/ticket/42785
+			'show_in_rest'      => true,
+			'rest_base' => $this->rest_base,
+			'template' => array(
+				array( 'core/paragraph', array(
+					'placeholder' => 'Start the story...',
+				) ),
+				array( 'cave-your-own-adventure/block', array() ),
+			),
 		);
 
 		register_post_type( $this->post_type, $args );
@@ -105,6 +126,33 @@ class CYOA_Custom_Post {
 			'show_admin_column' => true,
 		);
 		register_taxonomy( $this->post_tag, array( $this->post_type ), $tag );
+	}
+
+	public function add_settings_page() {
+		add_submenu_page( 'edit.php?post_type=' . $this->post_type, 'Settings', 'Settings', 'manage_options', 'cyoa-settings', array( $this, 'cyoa_options_display' ) );
+
+	}
+
+	public function cyoa_options_display() {
+		echo '<div class="wrap"><div id="icon-tools" class="icon32"></div>';
+		echo '<h2>My Custom Submenu Page</h2>';
+		echo '</div>';
+	}
+
+	public function add_meta() {
+		add_meta_box(
+			'wporg_box_id',           // Unique ID
+			'Custom Meta Box Title',  // Box title
+			array( $this, 'wporg_custom_box_html' ),  // Content callback, must be of type callable
+			$this->post_type                   // Post type
+		);
+	}
+
+
+	public function wporg_custom_box_html() {
+		echo '<div class="wrap"><div id="icon-tools" class="icon32"></div>';
+		echo '<h2>My Custom Submenu Page</h2>';
+		echo '</div>';
 	}
 
 } // end class

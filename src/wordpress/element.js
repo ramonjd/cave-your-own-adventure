@@ -1,1 +1,1 @@
-export const { Component } = wp.element;
+export const { Component, createElement, Fragment } = wp.element;
