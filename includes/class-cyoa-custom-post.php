@@ -71,7 +71,7 @@ class CYOA_Custom_Post {
 			'add_new_item'       => 'New Story',
 			'edit_item'          => 'Edit Story',
 			'new_item'           => 'New Story',
-			'view_item'          => 'View Stories',
+			'view_item'          => 'View Story',
 			'search_items'       => 'Search Stories',
 			'not_found'          => 'No Stories found',
 			'not_found_in_trash' => 'No Stories in Trash',
@@ -80,7 +80,7 @@ class CYOA_Custom_Post {
 		$args = array(
 			'description'       => 'A starter post for a cave your own adventure!',
 			'public'            => true,
-			'supports'          => array( 'title', 'editor' ),
+			'supports'          => array( 'title', 'editor', 'page-attributes' ),
 			'labels'            => $labels,
 			'hierarchical'      => true,
 			'has_archive'       => true,
@@ -98,7 +98,7 @@ class CYOA_Custom_Post {
 			'rest_base' => $this->rest_base,
 			'template' => array(
 				array( 'core/paragraph', array(
-					'placeholder' => 'Start the story...',
+					'placeholder' => 'The adventure awaits...',
 				) ),
 				array( 'cave-your-own-adventure/block', array() ),
 			),

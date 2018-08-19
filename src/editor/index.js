@@ -94,13 +94,13 @@ class CYOABlock {
 
 	} );
 
-	createChapter = postId => {
+	createChapter = parentId => {
 		apiRequest( {
 			path: '/wp/v2/cave-your-own-adventure',
 			method: 'POST',
 			data: {
 				title: 'BOMB',
-				parent: postId,
+				parent: parentId,
 			}
 		} ).then( posts => {
 			console.log( posts );
@@ -114,30 +114,41 @@ class CYOABlock {
 		const postType = getPostType( postTypeSlug );
 		const postId = getCurrentPostId();
 		const isHierarchical = get( postType, [ 'hierarchical' ], false );
+		const parentId = getEditedPostAttribute( 'parent' );
+		const parentTitle = getEditedPostAttribute( 'title' );
 		// eslint-disable-next-line
 		console.log( 'postTypeSlug', postTypeSlug );
 		const query = {
 			per_page: -1,
-			parent: postId,
+			parent: isHierarchical ? parentId : postId,
 			order: 'asc',
 			status: 'draft'
 		};
 		return {
-			parent: getEditedPostAttribute( 'parent' ),
-			items: isHierarchical ? getEntityRecords( 'postType', postTypeSlug, query ) : [],
+			parentId,
+			items: getEntityRecords( 'postType', postTypeSlug, query ),
 			postId,
 			postType,
 			isHierarchical,
 			isCurrentPostPublished,
 			isEditedPostNew,
+			parentTitle,
 		};
-	} )( ( { items, parent, postId, postType, isHierarchical, isEditedPostNew, className, content, setAttributes } ) => {
+	} )( ( { items, parentId, postId, postType, isHierarchical, isEditedPostNew, className, content, setAttributes, parentTitle } ) => {
 // eslint-disable-next-line
-console.log( 'isEditedPostNew', isEditedPostNew(), postId );
+console.log( 'isEditedPostNew', isEditedPostNew(), postId, parentTitle );
 		if ( isEditedPostNew() ) {
 			return (
-				<div>
-				<p>To create story links, please save the page.</p>
+				<div className={ className }>
+					<RichText
+						tagName="p"
+						value={ content }
+						onChange={ content => setAttributes( { content } ) }
+						formattingControls={ [] }
+						multiline={ false }
+						placeholder="You choose to enter the link text here..."
+					/>
+
 					<Button isDefault onClick={ this.autoSave }>
 						Save now
 					</Button>
@@ -146,13 +157,27 @@ console.log( 'isEditedPostNew', isEditedPostNew(), postId );
 		}
 
 		// eslint-disable-next-line
-		console.log( 'edit', isHierarchical, items, parent, postId, postType, className );
+		console.log( 'edit', isHierarchical, items, postType );
+		console.log( 'postId',  postId );
+		console.log( 'parent',  parentId );
 		if ( ! items || items.length === 0 ) {
 			return (
-				<div>
-					<p>You have not created any chapters for this adventure.</p>
+				<div className={ className }>
+					<p>You have not created any chapter links for this adventure.</p>
+
+					<h3>Link text</h3>
+					<RichText
+						tagName="p"
+						value={ content }
+						onChange={ content => setAttributes( { content } ) }
+						formattingControls={ [] }
+						multiline={ false }
+						placeholder="You choose to enter the link text here..."
+					/>
+
+					<h3>Chapter post title</h3>
 					<MyTextControl />
-					<Button isDefault onClick={ () => this.createChapter( postId ) }>
+					<Button isDefault onClick={ () => this.createChapter( parentId, parentTitle ) }>
 						Create a new chapter
 					</Button>
 				</div>
@@ -161,13 +186,24 @@ console.log( 'isEditedPostNew', isEditedPostNew(), postId );
 // eslint-disable-next-line
 console.log( 'items', items );
 		return (
-			<div>
+			<div className={ className }>
 				Choose one to link to:
 				{ items.map( item => {
 					return (
 						<p key={ item.id }>{ item.title.rendered }</p>
 					)
 				} )}
+				<h3>Link text</h3>
+				<RichText
+					tagName="p"
+					value={ content }
+					onChange={ ( content ) => setAttributes( { content } ) }
+					formattingControls={ [] }
+					multiline={ false }
+					placeholder="You choose to enter the link text here..."
+				/>
+
+				<h3>Chapter post title</h3>
 				<MyTextControl />
 				<Button isDefault onClick={ () => this.createChapter( postId ) }>
 					Create a new chapter
@@ -176,10 +212,11 @@ console.log( 'items', items );
 		);
 	} );
 
-	save = () => {
+	save = ( { attributes } ) => {
+		const { content, className } = attributes;
 		return(
-			<div>
-
+			<div className={ className }>
+				<RichText.Content tagName="p" value={ content } />
 			</div>
 		);
 	};

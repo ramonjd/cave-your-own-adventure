@@ -41,6 +41,10 @@ if ( ! defined( 'CYOA_NAME' ) ) {
 	define( 'CYOA_NAME', trim( dirname( plugin_basename( __FILE__ ) ), '/' ) );
 }
 
+
+// TODO: create setup/tear down plugin class
+// do this: https://codex.wordpress.org/Function_Reference/register_post_type#Flushing_Rewrite_on_Activation
+
 require_once plugin_dir_path( __FILE__ ) . '/includes/class-cyoa-custom-post.php';
 require_once plugin_dir_path( __FILE__ ) . '/block/index.php';
 
