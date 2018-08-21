@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import { get } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import {
 	registerBlockType,
 } from '@wordpress/blocks';
@@ -102,12 +102,12 @@ class CYOABlock {
 		} ),
 	] )( ( { onClick } ) =>  <Button isDefault onClick={ onClick }> Save now </Button> );
 
-	createChapter = parentId => {
+	createChapter = ( parentId, parentTitle = 'New Chapter' ) => {
 		apiRequest( {
 			path: '/wp/v2/cave-your-own-adventure',
 			method: 'POST',
 			data: {
-				title: 'BOMB',
+				title: `${ parentTitle }-${ wp.date.dateI18n('M d Y, h:m:s a') }`,
 				parent: parentId,
 			}
 		} ).then( posts => {
@@ -135,9 +135,10 @@ class CYOABlock {
 		const isNewPost = isEditedPostNew();
 		// eslint-disable-next-line
 		console.log( 'isNewPost in seclecasdfadf adsf a', isNewPost );
+		const items = getEntityRecords( 'postType', postTypeSlug, query );
 		return {
 			parentId,
-			items: getEntityRecords( 'postType', postTypeSlug, query ),
+			items,
 			postId,
 			postType,
 			isHierarchical,
@@ -161,35 +162,7 @@ console.log( 'isNewPost', isNewPost, postId, parentTitle );
 		console.log( 'edit', isHierarchical, items, postType );
 		console.log( 'postId',  postId );
 		console.log( 'parent',  parentId );
-		if ( ! items || items.length === 0 ) {
-			return (
-				<div className={ className }>
-					<h3>Add a choice</h3>
-					<RichText
-						tagName="span"
-						value={ content }
-						onChange={ ( content ) => setAttributes( { content } ) }
-						formattingControls={ [ 'bold', 'italic', 'strikethrough' ] }
-						multiline={ false }
-						placeholder="You choose to enter the link text here..."
-					/>
-					<h3>Select a chapter to link to</h3>
-					{ items.map( item => {
-						return (
-							<p key={ item.id }><a href={ item.link }>{ item.title.rendered }</a></p>
-						)
-					} )}
 
-					OR
-
-					<h3>Create a new chapter</h3>
-					<MyTextControl />
-					<Button isDefault onClick={ () => this.createChapter( postId ) }>
-						Create a new chapter
-					</Button>
-				</div>
-			);
-		}
 // eslint-disable-next-line
 console.log( 'items', items );
 		return (
@@ -203,19 +176,23 @@ console.log( 'items', items );
 					multiline={ false }
 					placeholder="You choose to enter the link text here..."
 				/>
-				<h3>Select a chapter to link to</h3>
-				{ items.map( item => {
-					return (
-						<p key={ item.id }><a href={ item.link }>{ item.title.rendered }</a></p>
-					)
-				} )}
-				]
 
-				OR
+				{ ! isEmpty( items ) && <Fragment>
+
+					<h3>Select a chapter to link to</h3>
+					{ items.map( item => {
+						return (
+							<p key={ item.id }><a href={ item.link }>{ item.title.rendered || 'No title' }</a></p>
+						)
+					} )}
+
+				</Fragment>}
+
+
 
 				<h3>Create a new chapter</h3>
 				<MyTextControl />
-				<Button isDefault onClick={ () => this.createChapter( postId ) }>
+				<Button isDefault onClick={ () => this.createChapter( postId, parentTitle ) }>
 					Create a new chapter
 				</Button>
 			</div>
