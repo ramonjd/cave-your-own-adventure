@@ -51,8 +51,14 @@ class CYOABlock {
 		content: {
 			type: 'array',
 			source: 'children',
-			selector: 'p',
+			selector: 'span',
 		},
+
+		url: {
+			source: 'attribute',
+			selector: 'a',
+			attribute: 'href',
+		}
 	};
 /*
 	edit = ( { attributes, setAttributes } ) => {
@@ -77,22 +83,24 @@ class CYOABlock {
 		);
 	};*/
 
-	autoSave = compose( [
+	renderSaveButton = compose( [
 		withSelect( ( select ) => {
+			const { getEditedPostAttribute } = select( 'core/editor' );
 			return {
-				parent: select( 'core/editor' ).getEditedPostAttribute( 'parent' ),
-				isAutosaveable: select( 'core/editor' ).isAutosaveable(),
+				parent: getEditedPostAttribute( 'parent' ),
 			};
 		} ),
-		withDispatch( ( dispatch ) => ( {
-			autosavePage: dispatch( 'core/editor' ).autosave,
-		} ) ),
-	] )( ( { parent, isAutosaveable, autosavePage } ) => {
-		if ( isAutosaveable() ) {
-			autosavePage( parent );
-		}
-
-	} );
+		withDispatch( ( dispatch ) => {
+			const { editPost, savePost } = dispatch( 'core/editor' );
+			return {
+				onClick: () => {
+					console.log( 'WWWWAAAAA',  );
+					editPost( { status: 'draft' } );
+					savePost();
+				}
+			};
+		} ),
+	] )( ( { onClick } ) =>  <Button isDefault onClick={ onClick }> Save now </Button> );
 
 	createChapter = parentId => {
 		apiRequest( {
@@ -117,13 +125,16 @@ class CYOABlock {
 		const parentId = getEditedPostAttribute( 'parent' );
 		const parentTitle = getEditedPostAttribute( 'title' );
 		// eslint-disable-next-line
-		console.log( 'postTypeSlug', postTypeSlug );
+		console.log( 'postId', postId );
 		const query = {
 			per_page: -1,
 			parent: isHierarchical ? parentId : postId,
 			order: 'asc',
 			status: 'draft'
 		};
+		const isNewPost = isEditedPostNew();
+		// eslint-disable-next-line
+		console.log( 'isNewPost in seclecasdfadf adsf a', isNewPost );
 		return {
 			parentId,
 			items: getEntityRecords( 'postType', postTypeSlug, query ),
@@ -131,27 +142,17 @@ class CYOABlock {
 			postType,
 			isHierarchical,
 			isCurrentPostPublished,
-			isEditedPostNew,
+			isNewPost,
 			parentTitle,
 		};
-	} )( ( { items, parentId, postId, postType, isHierarchical, isEditedPostNew, className, content, setAttributes, parentTitle } ) => {
+	} )( ( { items, parentId, postId, postType, isHierarchical, isNewPost, className, content, setAttributes, parentTitle } ) => {
 // eslint-disable-next-line
-console.log( 'isEditedPostNew', isEditedPostNew(), postId, parentTitle );
-		if ( isEditedPostNew() ) {
+console.log( 'isNewPost', isNewPost, postId, parentTitle );
+		if ( isNewPost ) {
 			return (
 				<div className={ className }>
-					<RichText
-						tagName="p"
-						value={ content }
-						onChange={ content => setAttributes( { content } ) }
-						formattingControls={ [] }
-						multiline={ false }
-						placeholder="You choose to enter the link text here..."
-					/>
-
-					<Button isDefault onClick={ this.autoSave }>
-						Save now
-					</Button>
+					<p>Before we can add a choice, we need to save the post</p>
+					{ this.renderSaveButton() }
 				</div>
 			);
 		}
@@ -163,21 +164,27 @@ console.log( 'isEditedPostNew', isEditedPostNew(), postId, parentTitle );
 		if ( ! items || items.length === 0 ) {
 			return (
 				<div className={ className }>
-					<p>You have not created any chapter links for this adventure.</p>
-
-					<h3>Link text</h3>
+					<h3>Add a choice</h3>
 					<RichText
-						tagName="p"
+						tagName="span"
 						value={ content }
-						onChange={ content => setAttributes( { content } ) }
-						formattingControls={ [] }
+						onChange={ ( content ) => setAttributes( { content } ) }
+						formattingControls={ [ 'bold', 'italic', 'strikethrough' ] }
 						multiline={ false }
 						placeholder="You choose to enter the link text here..."
 					/>
+					<h3>Select a chapter to link to</h3>
+					{ items.map( item => {
+						return (
+							<p key={ item.id }><a href={ item.link }>{ item.title.rendered }</a></p>
+						)
+					} )}
 
-					<h3>Chapter post title</h3>
+					OR
+
+					<h3>Create a new chapter</h3>
 					<MyTextControl />
-					<Button isDefault onClick={ () => this.createChapter( parentId, parentTitle ) }>
+					<Button isDefault onClick={ () => this.createChapter( postId ) }>
 						Create a new chapter
 					</Button>
 				</div>
@@ -187,23 +194,26 @@ console.log( 'isEditedPostNew', isEditedPostNew(), postId, parentTitle );
 console.log( 'items', items );
 		return (
 			<div className={ className }>
-				Choose one to link to:
-				{ items.map( item => {
-					return (
-						<p key={ item.id }>{ item.title.rendered }</p>
-					)
-				} )}
-				<h3>Link text</h3>
+				<h3>Add a choice</h3>
 				<RichText
-					tagName="p"
+					tagName="span"
 					value={ content }
 					onChange={ ( content ) => setAttributes( { content } ) }
-					formattingControls={ [] }
+					formattingControls={ [ 'bold', 'italic', 'strikethrough' ] }
 					multiline={ false }
 					placeholder="You choose to enter the link text here..."
 				/>
+				<h3>Select a chapter to link to</h3>
+				{ items.map( item => {
+					return (
+						<p key={ item.id }><a href={ item.link }>{ item.title.rendered }</a></p>
+					)
+				} )}
+				]
 
-				<h3>Chapter post title</h3>
+				OR
+
+				<h3>Create a new chapter</h3>
 				<MyTextControl />
 				<Button isDefault onClick={ () => this.createChapter( postId ) }>
 					Create a new chapter
@@ -216,7 +226,7 @@ console.log( 'items', items );
 		const { content, className } = attributes;
 		return(
 			<div className={ className }>
-				<RichText.Content tagName="p" value={ content } />
+				<RichText.Content tagName="span" value={ content } />
 			</div>
 		);
 	};

@@ -84,9 +84,9 @@ function cyoa_block_assets() {
 
 	register_block_type('cave-your-own-adventure/block', array(
 		'editor_script' => 'cyoa-script',
-		'editor_style' => 'cyoa-editor-style',
-		'script' => 'cyoa-frontend-script',
-		'style' => 'cyoa-frontend-style',
+		'editor_style'  => 'cyoa-editor-style',
+		'script'        => 'cyoa-frontend-script',
+		'style'         => 'cyoa-frontend-style',
 	));
 }
 
