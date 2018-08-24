@@ -30,18 +30,11 @@ import { addFilter } from '@wordpress/hooks';
 import { withSelect, withDispatch } from '@wordpress/data';
 import apiRequest from '@wordpress/api-request';
 
+import PostCreator from './post-creator';
+
 // Editor styles.
 import './editor.scss';
 
-const MyTextControl = withState( {
-	className: '',
-} )( ( { className, setState } ) => (
-	<TextControl
-		label="Chapter title"
-		value={ className }
-		onChange={ ( className ) => setState( { className } ) }
-	/>
-) );
 
 class CYOABlock {
 	title = __(' Cave your own adventure ');
@@ -60,28 +53,37 @@ class CYOABlock {
 			attribute: 'href',
 		}
 	};
-/*
-	edit = ( { attributes, setAttributes } ) => {
-		const { content } = attributes;
-		return(
-			<div className={ classNames( 'cyoa__editor' ) }>
-				<TextControl />
 
-				<MenuGroup label="Settings">
+	// TODO: create component
+	renderSavedPosts = ( items, postId ) => {
+		const options = items
+			.filter( item => !! item.parent && item.id !== postId )
+			.map( item => {
+			return {
+				label: item.title.rendered || 'No title',
+				value: item.id,
+			};
+/*			return (
+				<p key={ item.id }><a href={ item.link }>{ item.title.rendered || 'No title' }</a></p>
+			)*/
+		} );
+
+		if ( isEmpty( options) ) {
+			return null;
+		}
+
+		return (
+			<div className="cyoa__editor-saved-posts">
+				<h3>Add a choice</h3>
+				<MenuGroup label="Select a chapter to link to">
 					<MenuItem>
-						<TextControl />
-						<SelectControl
-							options={ [
-								{ label: 'Big', value: '100%' },
-								{ label: 'Medium', value: '50%' },
-								{ label: 'Small', value: '25%' },
-							] }
-						/>
+						<SelectControl options={ options } />
 					</MenuItem>
 				</MenuGroup>
 			</div>
 		);
-	};*/
+
+	};
 
 	renderSaveButton = compose( [
 		withSelect( ( select ) => {
@@ -102,18 +104,51 @@ class CYOABlock {
 		} ),
 	] )( ( { onClick } ) =>  <Button isDefault onClick={ onClick }> Save now </Button> );
 
-	createChapter = ( parentId, parentTitle = 'New Chapter' ) => {
-		apiRequest( {
-			path: '/wp/v2/cave-your-own-adventure',
-			method: 'POST',
-			data: {
-				title: `${ parentTitle }-${ wp.date.dateI18n('M d Y, h:m:s a') }`,
-				parent: parentId,
-			}
-		} ).then( posts => {
-			console.log( posts );
-		} );
-	};
+	renderSavedStoryChapters = withSelect( ( select ) => {
+		const { getPostType, getEntityRecords } = select( 'core' );
+		const { getCurrentPostId, getEditedPostAttribute } = select( 'core/editor' );
+		const postId = getCurrentPostId();
+		const query = {
+			per_page: -1,
+			parent: getEditedPostAttribute( 'parent' ) || postId,
+			order: 'asc',
+			status: [ 'any' ]
+		};
+		const items = getEntityRecords( 'postType', getEditedPostAttribute( 'type' ), query ) || [];
+		return {
+			items,
+			postId,
+		};
+	} )( ( { items, postId } ) => {
+		const options = items
+			.filter( item => !! item.parent && item.id !== postId )
+			.map( item => {
+				return {
+					label: item.title.rendered || 'No title',
+					value: item.id,
+				};
+				/*			return (
+								<p key={ item.id }><a href={ item.link }>{ item.title.rendered || 'No title' }</a></p>
+							)*/
+			} );
+
+		if ( isEmpty( options) ) {
+			return null;
+		}
+
+		return (
+			<div className="cyoa__editor-saved-posts">
+				<h3>Add a choice</h3>
+				<MenuGroup label="Select a chapter to link to">
+					<MenuItem>
+						<SelectControl options={ options } />
+					</MenuItem>
+				</MenuGroup>
+				<Button isDefault> Select link </Button>
+			</div>
+		);
+	} );
+
 
 	edit = withSelect( ( select ) => {
 		const { getPostType, getEntityRecords } = select( 'core' );
@@ -124,11 +159,10 @@ class CYOABlock {
 		const isHierarchical = get( postType, [ 'hierarchical' ], false );
 		const parentId = getEditedPostAttribute( 'parent' );
 		const parentTitle = getEditedPostAttribute( 'title' );
-		// eslint-disable-next-line
-		console.log( 'postId', postId );
+
 		const query = {
 			per_page: -1,
-			parent: isHierarchical ? parentId : postId,
+			parent: parentId || postId,
 			order: 'asc',
 			status: 'draft'
 		};
@@ -147,8 +181,7 @@ class CYOABlock {
 			parentTitle,
 		};
 	} )( ( { items, parentId, postId, postType, isHierarchical, isNewPost, className, content, setAttributes, parentTitle } ) => {
-// eslint-disable-next-line
-console.log( 'isNewPost', isNewPost, postId, parentTitle );
+
 		if ( isNewPost ) {
 			return (
 				<div className={ className }>
@@ -158,16 +191,8 @@ console.log( 'isNewPost', isNewPost, postId, parentTitle );
 			);
 		}
 
-		// eslint-disable-next-line
-		console.log( 'edit', isHierarchical, items, postType );
-		console.log( 'postId',  postId );
-		console.log( 'parent',  parentId );
-
-// eslint-disable-next-line
-console.log( 'items', items );
 		return (
 			<div className={ className }>
-				<h3>Add a choice</h3>
 				<RichText
 					tagName="span"
 					value={ content }
@@ -176,25 +201,8 @@ console.log( 'items', items );
 					multiline={ false }
 					placeholder="You choose to enter the link text here..."
 				/>
-
-				{ ! isEmpty( items ) && <Fragment>
-
-					<h3>Select a chapter to link to</h3>
-					{ items.map( item => {
-						return (
-							<p key={ item.id }><a href={ item.link }>{ item.title.rendered || 'No title' }</a></p>
-						)
-					} )}
-
-				</Fragment>}
-
-
-
-				<h3>Create a new chapter</h3>
-				<MyTextControl />
-				<Button isDefault onClick={ () => this.createChapter( postId, parentTitle ) }>
-					Create a new chapter
-				</Button>
+				{ this.renderSavedStoryChapters() }
+				<PostCreator onCreated={ } />
 			</div>
 		);
 	} );

@@ -1,0 +1,1 @@
+export const { dateI18n } = wp.date;

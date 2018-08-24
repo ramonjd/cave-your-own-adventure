@@ -1,1 +1,1 @@
-export const { withSelect, withDispatch } = wp.data;
+export const { withSelect, withDispatch, registerStore } = wp.data;
