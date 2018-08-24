@@ -219,7 +219,8 @@ class CYOABlock {
 
 registerBlockType( 'cave-your-own-adventure/block', new CYOABlock() );
 
-
+// here we can show the story structure with a tree navigation
+// https://wordpress.org/gutenberg/handbook/components/tree-select/ ?
 const withInspectorControls = createHigherOrderComponent( function( BlockEdit ) {
 	return function( props ) {
 		return createElement(
