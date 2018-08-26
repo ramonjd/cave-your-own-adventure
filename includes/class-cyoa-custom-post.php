@@ -153,6 +153,8 @@ class CYOA_Custom_Post {
 	public function wporg_custom_box_html() {
 		echo '<div class="wrap"><div id="icon-tools" class="icon32"></div>';
 		echo '<h2>This is where we are going to show which pages link TO THIS PAGE</h2>';
+		echo '<h2>Also the home page and hierarchy tree</h2>';
+		echo '<h2>Also </h2>';
 		echo '</div>';
 	}
 

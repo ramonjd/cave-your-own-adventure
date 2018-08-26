@@ -1,24 +1,28 @@
 /* CYOA editor styles */
 
 .cyoa-editor {
-
 	$self: &;
 
 	background-color: rgba(201, 255, 253, 0.25);
-	padding: 20px;
+	padding: 10px 20px;
 	border-radius: 10px;
-
-	&.is-content-empty {
-		#{ $self }__choice-text {
-			background-color: red;
-		}
-	}
 
 	&__choice-text {
 		font-size: 20px;
 		display: block;
 		margin-bottom: 10px;
+		background-color: white;
+		padding: 5px 10px;
+		border-radius: 5px;
 	}
+
+	&.is-content-empty {
+		#{ $self }__choice-text {
+			border: 1px solid rgba(255, 184, 179, 0.88);
+			background-color: rgba(255, 242, 249, 0.87);
+		}
+	}
+
 	&__choice-link {
 		font-size: 12px;
 		span {
@@ -26,8 +30,52 @@
 			margin-right: 4px;
 		}
 	}
+
 	&__choice-link-edit {
 		display: inline-block;
 		padding: 0;
+	}
+
+	&__choice-info {
+		display: inline-block;
+		margin: 0 0 10px 0;
+		font-size: 12px;
+		font-weight: bold;
+	}
+
+	&__new-post-title {
+		display: inline-block;
+		margin: 0 10px 0 0;
+	}
+
+	&__post-creator {
+		label {
+			position: absolute;
+			left: 10000px;
+		}
+	}
+
+	&__post-selector {
+		margin: 0 0 10px 0;
+
+		#{ $self }__select,
+		.dashicons {
+			display: inline-block;
+			margin: 0 10px 0 0;
+			padding: 0;
+		}
+		label {
+			position: absolute;
+			left: 10000px;
+		}
+		.dashicons {
+			line-height: 1.5;
+		}
+		.dashicons-plus {
+			cursor: pointer;
+			&.is-active {
+				transform: rotate( 45deg );
+			}
+		}
 	}
 }

@@ -46,7 +46,9 @@ import PostSave from './components/post-save';
 
 // Editor styles.
 import './editor.scss';
+import {dateI18n} from "@example/wordpress/date";
 
+export const CYOA_BLOCK_NAME = 'cave-your-own-adventure/block';
 
 class CYOABlock {
 	title = __( 'Cave your own adventure' );
@@ -66,10 +68,18 @@ class CYOABlock {
 		}
 	};
 
-	edit = withSelect( ( select, state ) => ( {
-		isNewPost: select('core/editor').isEditedPostNew(),
-	} ) )( ( { className, attributes, setAttributes, isNewPost } ) => {
+	renderChoiceInfo = ( blocks, clientId ) =>
+		<span className="cyoa-editor__choice-info">Choice { blocks.indexOf( clientId ) + 1 } of { blocks.length }</span>;
 
+	edit = withSelect( ( select, state ) => {
+		const { isEditedPostNew, getBlockOrder, getBlockName } = select('core/editor');
+		const blocks = getBlockOrder()
+			.filter( id => state.name === getBlockName( id ) );
+		return {
+			isNewPost: isEditedPostNew(),
+			blockInfo: this.renderChoiceInfo( blocks, state.clientId ),
+		};
+	} )( ( { className, name, attributes, setAttributes, isNewPost, blockInfo } ) => {
 		const { content, url } = attributes;
 		const blockClasses = classNames( className, 'cyoa-editor', {
 			'is-content-empty': isEmpty( content ),
@@ -79,6 +89,7 @@ class CYOABlock {
 				{ isNewPost ?
 					<PostSave onSave={ () => {} } /> : (
 						<Fragment>
+							{ blockInfo }
 							<RichText
 								className="cyoa-editor__choice-text"
 								tagName="span"
@@ -86,12 +97,8 @@ class CYOABlock {
 								onChange={ content => setAttributes( { content } ) }
 								formattingControls={ [ 'bold', 'italic', 'strikethrough' ] }
 								multiline={ false }
-								placeholder="You choose to enter the link text here..."
+								placeholder="Enter choice text..."
 							/>
-							<div className="cyoa-editor__choice-link">
-								<span>This choice links to the following chapter:</span>
-								{ url ? ( <a href={ url }>{ url }</a> ) : <span>None so far!</span> }
-							</div>
 							<PostSelector selected={ url } onSelect={ url => setAttributes( { url } ) } />
 						</Fragment>
 					)
@@ -112,7 +119,7 @@ class CYOABlock {
 	};
 }
 
-registerBlockType( 'cave-your-own-adventure/block', new CYOABlock() );
+registerBlockType( CYOA_BLOCK_NAME, new CYOABlock() );
 
 // here we can show the story structure with a tree navigation
 // https://wordpress.org/gutenberg/handbook/components/tree-select/ ?

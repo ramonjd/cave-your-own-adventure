@@ -1,10 +1,10 @@
 /*
 	Check whether the selected post points back to this one and warn about circular
  */
-
 /**
  * External dependencies
  */
+import classNames from 'classnames';
 import { isEmpty } from 'lodash';
 
 /**
@@ -12,57 +12,88 @@ import { isEmpty } from 'lodash';
  */
 import { __ } from '@wordpress/i18n';
 import { dateI18n } from '@wordpress/date';
-import { SelectControl, Button } from '@wordpress/components';
-import { withSelect } from '@wordpress/data';
-import { compose } from '@wordpress/compose';
-import {withState} from "@example/wordpress/compose";
+import { SelectControl } from '@wordpress/components';
+import { withSelect, withDispatch } from '@wordpress/data';
+import { compose, withState } from '@wordpress/compose';
+import { Fragment } from '@wordpress/element';
+/**
+ * Internal dependencies
+ */
+import PostCreator from './post-creator';
 
-function PostSelector( { options, selected, onChange, onClick, url, setState } ) {
+function PostSelector( { options, selected, onChange, onCreateNewPost, showCreatePost, setState } ) {
+	const componentClasses = classNames( 'cyoa-editor__post-selector' );
+	const iconClasses = classNames( 'dashicons dashicons-plus', {
+		'is-active': showCreatePost,
+	} );
+	const hasOptions = options.length > 1;
+
 	return (
-		<div className="cyoa__editor-post-selector">
-			{ isEmpty( options )
-				? <p>You haven't created any chapters yet!</p>
-				: (
-					<SelectControl
-						label={ __( 'Select a chapter' ) }
-						value={ url || selected }
-						onChange={ url => setState( { url } ) }
-						options={ options }
-					/>
-				)
-			}
-			<Button isDefault onClick={ onClick }>{ __( 'Link to this post' ) }</Button>
-		</div>
+		<Fragment>
+			<div className={ componentClasses }>
+				{
+					! hasOptions
+						? <span>There aren't any chapters to link to!</span>
+						: (
+							<SelectControl
+								className="cyoa-editor__select"
+								label={ __( 'Links to' ) }
+								value={ selected }
+								onChange={ onChange }
+								options={ options }
+								disabled={ showCreatePost }
+							/>
+						)
+				}
+				<span
+					title={ __( 'Create a new chapter' ) }
+					onClick={ () => setState( { showCreatePost: ! showCreatePost } ) }
+					className={ iconClasses }
+				/>
+			</div>
+			{ showCreatePost && <PostCreator onCreate={ onCreateNewPost }/> }
+		</Fragment>
 	);
 }
 
 export default compose(
-	withState( { url: '' } ),
+	withState( { showCreatePost: false } ),
 	withSelect( ( select, ownProps ) => {
 		const { getEntityRecords } = select( 'core' );
-		const { getCurrentPostId, getEditedPostAttribute } = select( 'core/editor' );
+		const { getCurrentPostId, getEditedPostAttribute, getCurrentPostType } = select( 'core/editor' );
 		const postId = getCurrentPostId();
+		const postType = getCurrentPostType();
+		const parentId = getEditedPostAttribute( 'parent' ) || postId;
 		const query = {
 			per_page: -1,
-			parent: getEditedPostAttribute( 'parent' ) || postId,
+			parent: parentId,
 			order: 'asc',
 			status: [ 'any' ]
 		};
-		const posts = getEntityRecords( 'postType', getEditedPostAttribute( 'type' ), query ) || [];
+		const posts = getEntityRecords( 'postType', postType, query ) || [];
 		const options = posts
 			.filter( post => !! post.parent && post.id !== postId )
-			.map( post => {
-				return {
-					label: `${ post.title.rendered || __( 'No title' ) } - ${ dateI18n( 'M d Y, h:m:s a', post.date ) }`,
-					value: post.link,
-				};
-			} );
-
+			.map( post => ( {
+				label: `${ post.title.rendered || __( 'No title' ) } - ${ dateI18n( 'M d Y, h:m:s a', post.date ) }`,
+				value: post.link,
+			} ) );
+		options.unshift( {
+			label: __( 'Select a chapter' ),
+			value: '',
+		} );
 		return {
 			options,
-			onClick: () => {
-				ownProps.onSelect( ! isEmpty( ownProps.url ) ? ownProps.url : options[ 0 ].value );
+			onCreateNewPost: newPost => {
+				ownProps.onSelect( newPost.link );
+				ownProps.setState( { showCreatePost: false } );
 			},
 		};
 	} ),
+	withDispatch( ( dispatch, ownProps ) => ( {
+		onChange: value => {
+			ownProps.onSelect( ! isEmpty( value ) ? value : '' );
+			const { savePost } = dispatch( 'core/editor' );
+			savePost();
+		},
+	} ) ),
 )( PostSelector );

@@ -15,8 +15,9 @@ import { compose, withState } from '@wordpress/compose';
 
 function PostCreator( { onClick, postTitle, setState } ) {
 	return (
-		<div className="cyoa__editor-post-creator">
+		<div className="cyoa-editor__post-creator">
 			<TextControl
+				className="cyoa-editor__new-post-title"
 				placeholder={ __( 'No title' ) }
 				label={ __( 'Create a new chapter' ) }
 				value={ postTitle }
@@ -30,11 +31,11 @@ function PostCreator( { onClick, postTitle, setState } ) {
 export default compose(
 	withState( { postTitle: '' } ),
 	withSelect( select => {
-		const { getCurrentPostId, getEditedPostAttribute } = select( 'core/editor' );
 		const { getEntityRecords } = select( 'core' );
+		const { getCurrentPostId, getEditedPostAttribute, getCurrentPostType } = select( 'core/editor' );
 		const postId = getCurrentPostId();
+		const postType = getCurrentPostType();
 		const parentId = getEditedPostAttribute( 'parent' ) || postId;
-		const postType = getEditedPostAttribute( 'type' );
 		const query = {
 			per_page: -1,
 			parent: parentId,
@@ -46,7 +47,7 @@ export default compose(
 		return {
 			parentId,
 			postType,
-			posts: posts.filter( post => !! post.parent && post.id !== postId ),
+			posts,
 			query
 		};
 	} ),
@@ -62,6 +63,7 @@ export default compose(
 				data: {
 					title: `${ ownProps.postTitle }`,
 					parent: ownProps.parentId,
+					status: 'draft',
 				}
 			} ).then( post => {
 				ownProps.onCreate( post );
@@ -71,8 +73,9 @@ export default compose(
 					ownProps.posts.concat( post ),
 					ownProps.query
 				);
+				const { savePost } = dispatch( 'core/editor' );
+				savePost();
 			});
-
 		},
 	} ) ),
 )( PostCreator );
