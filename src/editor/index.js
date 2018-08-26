@@ -145,4 +145,4 @@ const withInspectorControls = createHigherOrderComponent( function( BlockEdit ) 
 	};
 }, 'withInspectorControls' );
 
-addFilter( 'editor.BlockEdit', 'my-plugin/with-inspector-controls', withInspectorControls );
+addFilter( 'editor.BlockEdit', 'cave-your-own-adventure/block-edit', withInspectorControls );

@@ -45,6 +45,13 @@ class CYOA_Custom_Post {
 	private $post_tag = 'cyoa_tag';
 
 	/**
+	 * Programmatic name for meta box
+	 *
+	 * @var string
+	 **/
+	private $meta_box_id = 'cyoa_meta_box';
+
+	/**
 	 * Default constructor that sets up the object
 	 **/
 	public function __construct() {
@@ -54,9 +61,9 @@ class CYOA_Custom_Post {
 		// Register taxonomies.
 		add_action( 'init', array( $this, 'register_taxonomy' ) );
 
-		add_action( 'admin_menu' , array( $this, 'add_settings_page' ) );
+		//add_action( 'admin_menu' , array( $this, 'add_settings_page' ) );
 
-		add_action('add_meta_boxes', array( $this, 'add_meta' ));
+		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
 
 	}
 
@@ -94,13 +101,14 @@ class CYOA_Custom_Post {
 			'show_in_menu'      => true,
 			'show_in_nav_menus' => true,
 			'menu_icon'         => 'dashicons-book-alt',
-			// To show Gutenberg: https://core.trac.wordpress.org/ticket/42785
+			// To show Gutenberg: https://core.trac.wordpress.org/ticket/42785 .
 			'show_in_rest'      => true,
-			'rest_base' => $this->rest_base,
-			'template' => array(
-				array( 'core/paragraph', array(
-					'placeholder' => 'The adventure awaits...',
-				) ),
+			'rest_base'         => $this->rest_base,
+			'template'          => array(
+				array(
+					'core/paragraph',
+					array( 'placeholder' => 'The adventure awaits...' ),
+				),
 				array( 'cave-your-own-adventure/block', array() ),
 			),
 		);
@@ -128,8 +136,12 @@ class CYOA_Custom_Post {
 		);
 		register_taxonomy( $this->post_tag, array( $this->post_type ), $tag );
 	}
-
-	public function add_settings_page() {
+// Settings page: do we need this?
+// Possible settings:
+// UI effects: page turning
+// Export single story to HTML?
+//
+/*	public function add_settings_page() {
 		add_submenu_page( 'edit.php?post_type=' . $this->post_type, 'Settings', 'Settings', 'manage_options', 'cyoa-settings', array( $this, 'cyoa_options_display' ) );
 
 	}
@@ -138,26 +150,26 @@ class CYOA_Custom_Post {
 		echo '<div class="wrap"><div id="icon-tools" class="icon32"></div>';
 		echo '<h2>My Custom Submenu Page</h2>';
 		echo '</div>';
-	}
+	}*/
 
-	public function add_meta() {
+	/**
+	 * Sets up post meta box
+	 **/
+	public function add_meta_box() {
 		add_meta_box(
-			'wporg_box_id',           // Unique ID
-			'Custom Meta Box Title',  // Box title
-			array( $this, 'wporg_custom_box_html' ),  // Content callback, must be of type callable
-			$this->post_type                   // Post type
+			$this->meta_box_id,
+			__( 'Story details', 'textdomain' ),
+			array( $this, 'cyoa_meta_box_template' ),
+			$this->post_type
 		);
 	}
 
-
-	public function wporg_custom_box_html() {
-		echo '<div class="wrap"><div id="icon-tools" class="icon32"></div>';
-		echo '<h2>This is where we are going to show which pages link TO THIS PAGE</h2>';
-		echo '<h2>Also the home page and hierarchy tree</h2>';
-		echo '<h2>Also </h2>';
-		echo '</div>';
+	/**
+	 * Sets up post meta box
+	 **/
+	public function cyoa_meta_box_template() {
+		require_once plugin_dir_path( __FILE__ ) . '../templates/meta-box-cyoa.php';
 	}
-
-} // end class
+}
 
 
