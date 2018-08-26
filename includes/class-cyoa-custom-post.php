@@ -66,15 +66,16 @@ class CYOA_Custom_Post {
 	public function register_post_type() {
 		$labels = array(
 			'name'               => 'Cave your own adventure',
+			'all_items'          => 'All stories',
 			'singular_name'      => 'Story',
-			'add_new'            => 'New Story',
-			'add_new_item'       => 'New Story',
-			'edit_item'          => 'Edit Story',
-			'new_item'           => 'New Story',
-			'view_item'          => 'View Story',
-			'search_items'       => 'Search Stories',
-			'not_found'          => 'No Stories found',
-			'not_found_in_trash' => 'No Stories in Trash',
+			'add_new'            => 'New story',
+			'add_new_item'       => 'New story',
+			'edit_item'          => 'Edit story',
+			'new_item'           => 'New story',
+			'view_item'          => 'View story',
+			'search_items'       => 'Search stories',
+			'not_found'          => 'No stories found',
+			'not_found_in_trash' => 'No stories in trash',
 		);
 
 		$args = array(
@@ -151,7 +152,7 @@ class CYOA_Custom_Post {
 
 	public function wporg_custom_box_html() {
 		echo '<div class="wrap"><div id="icon-tools" class="icon32"></div>';
-		echo '<h2>My Custom Submenu Page</h2>';
+		echo '<h2>This is where we are going to show which pages link TO THIS PAGE</h2>';
 		echo '</div>';
 	}
 

@@ -25,7 +25,7 @@ import {
 	Toolbar,
 	BaseControl,
 	IconButton,
-	MenuGroup, MenuItem, TextControl, SelectControl, PanelBody, Button
+	MenuGroup, MenuItem, TextControl, SelectControl, PanelBody, Button, TabPanel
 } from '@wordpress/components';
 
 import {
@@ -68,16 +68,19 @@ class CYOABlock {
 
 	edit = withSelect( ( select, state ) => ( {
 		isNewPost: select('core/editor').isEditedPostNew(),
-	} ) )( ( { attributes, setAttributes, isNewPost } ) => {
+	} ) )( ( { className, attributes, setAttributes, isNewPost } ) => {
 
-		const { content, url, className } = attributes;
-		const blockClasses = classNames( className );
+		const { content, url } = attributes;
+		const blockClasses = classNames( className, 'cyoa-editor', {
+			'is-content-empty': isEmpty( content ),
+		} );
 		return (
 			<div className={ blockClasses }>
 				{ isNewPost ?
 					<PostSave onSave={ () => {} } /> : (
 						<Fragment>
 							<RichText
+								className="cyoa-editor__choice-text"
 								tagName="span"
 								value={ content }
 								onChange={ content => setAttributes( { content } ) }
@@ -85,9 +88,11 @@ class CYOABlock {
 								multiline={ false }
 								placeholder="You choose to enter the link text here..."
 							/>
-							{ url && <a href={ url }>{ url }</a> }
-							<PostSelector onSelect={ url => setAttributes( { url } ) } />
-							<PostCreator onCreate={ post => setAttributes( { url: post.link } ) } />
+							<div className="cyoa-editor__choice-link">
+								<span>This choice links to the following chapter:</span>
+								{ url ? ( <a href={ url }>{ url }</a> ) : <span>None so far!</span> }
+							</div>
+							<PostSelector selected={ url } onSelect={ url => setAttributes( { url } ) } />
 						</Fragment>
 					)
 				}
@@ -95,8 +100,8 @@ class CYOABlock {
 		);
 	} );
 
-	save = ( { attributes } ) => {
-		const { content, url, className } = attributes;
+	save = ( { attributes, className } ) => {
+		const { content, url } = attributes;
 		return(
 			<div className={ className }>
 				<a href={ url } >

@@ -1,7 +1,33 @@
 /* CYOA editor styles */
 
-.cyoa__editor {
-	p {
-		background: red;
+.cyoa-editor {
+
+	$self: &;
+
+	background-color: rgba(201, 255, 253, 0.25);
+	padding: 20px;
+	border-radius: 10px;
+
+	&.is-content-empty {
+		#{ $self }__choice-text {
+			background-color: red;
+		}
+	}
+
+	&__choice-text {
+		font-size: 20px;
+		display: block;
+		margin-bottom: 10px;
+	}
+	&__choice-link {
+		font-size: 12px;
+		span {
+			display: inline-block;
+			margin-right: 4px;
+		}
+	}
+	&__choice-link-edit {
+		display: inline-block;
+		padding: 0;
 	}
 }
